@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.db.models import Count
 
-from .models import (Tag, Ingredient, IngredientAmount, Recipe,
-                     Subscription, FavoriteRecipe, ShoppingCart)
+from .models import (FavoriteRecipe, Ingredient, IngredientAmount, Recipe,
+                     ShoppingCart, Subscription, Tag)
 
 
 class TagAdmin(admin.ModelAdmin):

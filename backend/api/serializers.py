@@ -1,12 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
-from djoser.serializers import (UserSerializer, UserCreateSerializer,
-                                PasswordSerializer)
+from djoser.serializers import (PasswordSerializer, UserCreateSerializer,
+                                UserSerializer)
 from drf_extra_fields.fields import Base64ImageField
+from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
+                            Recipe, ShoppingCart, Subscription, Tag)
 from rest_framework import serializers
-
-from recipes.models import (Tag, Ingredient, IngredientAmount, Recipe,
-                            Subscription, FavoriteRecipe, ShoppingCart)
 
 User = get_user_model()
 
