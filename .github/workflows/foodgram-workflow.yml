@@ -66,10 +66,14 @@ jobs:
 
             sudo docker-compose stop
             sudo docker-compose rm backend
+            sudo docker-compose rm frontend
             sudo docker pull sengedzong/foodgram
-            sudo docker compose rm frontend
-            sudo docker compose pull foodgram_frontend
+            sudo docker pull sengedzong/foodgram_frontend
             sudo docker-compose up -d
+
+            sudo docker-compose exec -T backend python manage.py makemigrations
+            sudo docker-compose exec -T backend python manage.py migrate
+            sudo docker-compose exec -T backend python manage.py collectstatic --no-input
 
   send_message:
     runs-on: ubuntu-latest
