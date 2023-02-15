@@ -22,7 +22,7 @@ services:
       - ./.env
 
   frontend:
-    image: sengedzong/foodgram_frontend:latest
+    image: sengedzong/foodgram_frontend:v1.0
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
