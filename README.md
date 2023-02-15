@@ -1,5 +1,7 @@
-![yamdb_workflow](https://github.com/volynetsilya/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)
-http://51.250.31.244/admin/
+![foodgram_workflow](https://github.com/volynetsilya/foodgram-project-react/actions/workflows/foodgram-workflow.yml/badge.svg)
+
+
+http://158.160.14.42/admin/
 
 # Яндекс.Практикум: Продуктовый помощник Foodgram
 

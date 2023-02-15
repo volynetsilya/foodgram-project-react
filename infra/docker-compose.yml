@@ -10,24 +10,19 @@ services:
       - ./.env
 
   backend:
-    # image: ###
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: sengedzong/foodgram:latest
     restart: always
     volumes:
       - static_value:/app/static/
       - media_value:/app/media
+      - redoc:/app/docs/
     depends_on:
       - db
     env_file:
       - ./.env
 
   frontend:
-  # image: ###
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: sengedzong/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
@@ -50,3 +45,4 @@ volumes:
   static_value:
   media_value:
   db_value:
+  redoc:
