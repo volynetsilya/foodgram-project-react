@@ -1,11 +1,11 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import check_password
-from djoser.serializers import (PasswordSerializer, UserCreateSerializer,
-                                UserSerializer)
+from djoser.serializers import (UserCreateSerializer, UserSerializer)
+
+from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
+
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
                             Recipe, ShoppingCart, Subscription, Tag)
-from rest_framework import serializers
 
 User = get_user_model()
 
@@ -13,31 +13,11 @@ User = get_user_model()
 class UserCreateSerializer(UserCreateSerializer):
     class Meta:
         model = User
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'password'
+        fields = tuple(
+            User.REQUIRED_FIELDS) + (
+            User.USERNAME_FIELD,
+            'password',
         )
-        extra_kwargs = {'password': {'write_only': True}}
-
-
-class SetPasswordSerializer(PasswordSerializer):
-    old_password = serializers.CharField(
-        required=True,
-        label='Старый пароль'
-    )
-
-    def validate(self, data):
-        user = self.context.get('request').user
-        if data['new_password'] == data['old_password']:
-            raise serializers.ValidationError("Пароли не должны совпадать")
-        check_current = check_password(data['old_password'], user.password)
-        if check_current is False:
-            raise serializers.ValidationError("Введён неверный пароль!")
-        return data
 
 
 class UserListSerializer(UserSerializer):
@@ -156,9 +136,9 @@ class RecipeEditSerializer(serializers.ModelSerializer):
             IngredientAmount.objects.bulk_create([
                 IngredientAmount(
                     recipe=recipe,
-                    ingredient_id=ingredient.get('id'),
-                    Amount=ingredient.get('Amount'),
-                )])
+                    ingredient=Ingredient.objects.get(id=ingredient['id']),
+                    amount=ingredient['amount']
+                ) for ingredient in ingredients])
 
     def create(self, validate_data):
         ingredients = validate_data.pop('ingredients')
@@ -171,7 +151,6 @@ class RecipeEditSerializer(serializers.ModelSerializer):
     def update(self, instance, validate_data):
         if 'ingredients' in validate_data:
             ingredients = validate_data.pop('ingredients')
-            instance.ingredients.clear()
             self.create_ingredients(ingredients, instance)
         if 'tags' in validate_data:
             instance.tags.set(validate_data.pop('tags'))

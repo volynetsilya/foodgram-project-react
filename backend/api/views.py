@@ -2,23 +2,24 @@ from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from djoser.views import UserViewSet
-from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
-                            Subscription, Tag)
+
+from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (SAFE_METHODS, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
-from rest_framework.response import Response
+from djoser.views import UserViewSet
 
 from .filters import IngredientSearchFilter, RecipesFilter
 from .mixin import CreateDestroyViewSet
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (FavoriteRecipeSerializer, IngredientSerializer,
                           RecipeEditSerializer, RecipeSerializer,
-                          SetPasswordSerializer, ShoppingCartSerializer,
+                          ShoppingCartSerializer,
                           SubscriptionSerializer, TagSerializer,
                           UserCreateSerializer, UserListSerializer)
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
+                            Subscription, Tag)
 
 User = get_user_model()
 
@@ -28,8 +29,6 @@ class CustomUserViewSet(UserViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_serializer_class(self):
-        if self.action == 'set_password':
-            return SetPasswordSerializer
         if self.action == 'create':
             return UserCreateSerializer
         return UserListSerializer
@@ -83,10 +82,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         cart = user.shopping_cart.select_related('recipe').values(
             ingredient_name, ingredient_unit).annotate(Sum(
                 recipe_amount)).order_by(ingredient_name)
-        for _ in cart:
+        for product in cart:
             text += (
-                f'{_[ingredient_name]} ({_[ingredient_unit]})'
-                f' - {_[quantity_sum]}\n'
+                f'{product[ingredient_name]} ({product[ingredient_unit]})'
+                f' - {product[quantity_sum]}\n'
             )
         response = HttpResponse(text, content_typy='text/plain')
         filename = 'shopping_cart.txt'
@@ -167,8 +166,8 @@ class FavoriteRecipeViewSet(CreateDestroyViewSet):
 
     @action(methods=('delete',), detail=True)
     def delete(self, request, recipe_id):
-        u = request.user
-        if not u.favorite.select_related(
+        user = request.user
+        if not user.favorite.select_related(
                 'favorite_recipe').filter(
                     favorite_recipe_id=recipe_id).exists():
             return Response({'errors': 'Рецепт не в избранном'},
