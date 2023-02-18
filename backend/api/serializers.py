@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
-from djoser.serializers import (UserCreateSerializer, UserSerializer)
 
+from djoser.serializers import (UserCreateSerializer, UserSerializer)
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 
@@ -14,7 +14,7 @@ class UserCreateSerializer(UserCreateSerializer):
     class Meta:
         model = User
         fields = tuple(
-            User.REQUIRED_FIELDS) + (
+            *User.REQUIRED_FIELDS,
             User.USERNAME_FIELD,
             'password',
         )
@@ -132,13 +132,12 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         return data
 
     def create_ingredients(self, ingredients, recipe):
-        for ingredient in ingredients:
-            IngredientAmount.objects.bulk_create([
-                IngredientAmount(
-                    recipe=recipe,
-                    ingredient=Ingredient.objects.get(id=ingredient['id']),
-                    amount=ingredient['amount']
-                ) for ingredient in ingredients])
+        IngredientAmount.objects.bulk_create([
+            IngredientAmount(
+                recipe=recipe,
+                ingredient=Ingredient.objects.get(id=ingredient['id']),
+                amount=ingredient['amount']
+            ) for ingredient in ingredients])
 
     def create(self, validate_data):
         ingredients = validate_data.pop('ingredients')
