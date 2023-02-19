@@ -12,6 +12,7 @@ from rest_framework.permissions import (SAFE_METHODS, IsAuthenticated,
 
 from .filters import IngredientSearchFilter, RecipesFilter
 from .mixin import CreateDestroyViewSet
+from .pagination import LimitPageNumberPagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (FavoriteRecipeSerializer, IngredientSerializer,
                           RecipeEditSerializer, RecipeSerializer,
@@ -55,6 +56,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
     filterset_class = RecipesFilter
+    pagination_class = LimitPageNumberPagination
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -67,8 +69,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=('get',),
-        url_path='download_shopping_cart',
-        pagination_class=None)
+        url_path='download_shopping_cart')
     def download_file(self, request):
         user = request.user
         if not user.shopping_cart.exists():
@@ -97,14 +98,12 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    pagination_class = None
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    pagination_class = None
     filterset_class = IngredientSearchFilter
 
 

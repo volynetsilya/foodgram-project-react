@@ -72,6 +72,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserListSerializer(read_only=True)
+    image = Base64ImageField(max_length=None, use_url=True)
     ingredients = IngredientAmountSerializer(
         many=True,
         source='recipe',
@@ -83,7 +84,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('__all__')
+        fields = ('author', 'name', 'image', 'text', 'cooking_time',
+                  'tags', 'ingredients',
+                  'is_favorited', 'is_in_shopping_cart')
 
     def get_is_favorite(self, obj):
         return (self.context.get('request').user.is_authenticated
