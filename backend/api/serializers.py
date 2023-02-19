@@ -13,11 +13,15 @@ User = get_user_model()
 class UserCreateSerializer(UserCreateSerializer):
     class Meta:
         model = User
-        fields = tuple(
-            *User.REQUIRED_FIELDS,
-            User.USERNAME_FIELD,
-            'password',
+        fields = (
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "password",
         )
+        extra_kwargs = {"password": {"write_only": True}}
 
 
 class UserListSerializer(UserSerializer):
@@ -61,7 +65,7 @@ class IngredientEditSerializer(serializers.ModelSerializer):
 class IngredientAmountSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id',)
     name = serializers.ReadOnlyField(source='ingredient.name',)
-    units_of_measerement = serializers.ReadOnlyField(
+    measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit',
     )
 
@@ -73,12 +77,8 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserListSerializer(read_only=True)
     image = Base64ImageField(max_length=None, use_url=True)
-    ingredients = IngredientAmountSerializer(
-        many=True,
-        source='recipe',
-        required=True,
-    )
-    tag = TagSerializer(many=True, read_only=True)
+    ingredients = serializers.SerializerMethodField(read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
     is_favorite = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
@@ -86,7 +86,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('author', 'name', 'image', 'text', 'cooking_time',
                   'tags', 'ingredients',
-                  'is_favorited', 'is_in_shopping_cart')
+                  'is_favorite', 'is_in_shopping_cart')
 
     def get_is_favorite(self, obj):
         return (self.context.get('request').user.is_authenticated
@@ -99,6 +99,10 @@ class RecipeSerializer(serializers.ModelSerializer):
                 and ShoppingCart.objects.filter(
                     user=self.context.get('request').user,
                     recipe=obj).exists())
+
+    def get_ingredients(self, obj):
+        queryset = IngredientAmount.objects.filter(recipe=obj)
+        return IngredientAmountSerializer(queryset, many=True).data
 
 
 class RecipeEditSerializer(serializers.ModelSerializer):
