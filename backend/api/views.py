@@ -104,7 +104,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    filterset_class = IngredientSearchFilter
+    filter_backends = [IngredientSearchFilter]
+    search_fields = ('^name',)
 
 
 class SubscriptionViewSet(CreateDestroyViewSet):

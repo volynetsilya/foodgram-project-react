@@ -41,7 +41,8 @@ jobs:
         with:
           push: true
           context: ./backend
-          tags: sengedzong/foodgram:latest
+          file: ./backend/Dockerfile
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -59,7 +60,7 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram:latest
             sudo docker-compose stop
             sudo docker-compose rm backend
-
+            rm .env
             sudo touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
@@ -69,10 +70,6 @@ jobs:
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
 
             sudo docker-compose up -d
-
-            sudo docker-compose exec -T backend python manage.py makemigrations
-            sudo docker-compose exec -T backend python manage.py migrate
-            sudo docker-compose exec -T backend python manage.py collectstatic --no-input
 
   send_message:
     runs-on: ubuntu-latest

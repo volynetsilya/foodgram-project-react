@@ -58,7 +58,7 @@ class IngredientEditSerializer(serializers.ModelSerializer):
     Amount = serializers.IntegerField()
 
     class Meta:
-        model = Ingredient
+        model = IngredientAmount
         fields = ('id', 'Amount')
 
 
@@ -147,9 +147,10 @@ class RecipeEditSerializer(serializers.ModelSerializer):
             ) for ingredient in ingredients])
 
     def create(self, validate_data):
+        author = self.context.get('request').user
         ingredients = validate_data.pop('ingredients')
         tags = validate_data.pop('tags')
-        recipe = Recipe.objects.create(**validate_data)
+        recipe = Recipe.objects.create(author=author, **validate_data)
         recipe.tags.set(tags)
         self.create_ingredients(ingredients, recipe)
         return recipe
