@@ -56,10 +56,11 @@ class IngredientSerializer(serializers.ModelSerializer):
 class IngredientEditSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     Amount = serializers.IntegerField()
+    recipe = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = IngredientAmount
-        fields = ('id', 'Amount')
+        fields = ('id', 'Amount', 'recipe')
 
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
@@ -76,7 +77,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserListSerializer(read_only=True)
-    image = Base64ImageField(max_length=None, use_url=True)
+    image = Base64ImageField()
     ingredients = serializers.SerializerMethodField(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     is_favorite = serializers.SerializerMethodField(read_only=True)
@@ -107,8 +108,12 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class RecipeEditSerializer(serializers.ModelSerializer):
     author = serializers.PrimaryKeyRelatedField(read_only=True)
-    image = Base64ImageField(max_length=None, use_url=True)
+    image = Base64ImageField()
     ingredients = IngredientEditSerializer(many=True)
+    cooking_time = serializers.IntegerField(min_value=1)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True,
+    )
 
     class Meta:
         model = Recipe
