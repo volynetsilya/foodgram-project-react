@@ -35,6 +35,7 @@ class Ingredient(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
         constraints = [
             models.UniqueConstraint(
                 fields=('name', 'measurement_unit'),
@@ -61,7 +62,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         verbose_name='Ингредиенты',
-        through='Ingredientamount',
+        through='IngredientAmount',
         related_name='recipes',
     )
     tags = models.ManyToManyField(
@@ -91,13 +92,13 @@ class IngredientAmount(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='amounts',
+        related_name='recipe',
         verbose_name='Рецепт',
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='amounts',
+        related_name='amount',
         verbose_name='Ингредиент',
     )
     amount = models.PositiveIntegerField(
@@ -106,6 +107,7 @@ class IngredientAmount(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
         constraints = [
@@ -165,6 +167,7 @@ class FavoriteRecipe(models.Model):
                 fields=('user', 'favorite_recipe'),
                 name='unique favorite')]
         verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
         ordering = ('id',)
 
 

@@ -1,8 +1,13 @@
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
+# from django.db import transaction
+# from rest_framework.fields import IntegerField
 
 from djoser.serializers import (UserCreateSerializer, UserSerializer)
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
+import base64
+import uuid
 
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
                             Recipe, ShoppingCart, Subscription, Tag)
@@ -53,16 +58,6 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class IngredientEditSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    Amount = serializers.IntegerField()
-    recipe = serializers.PrimaryKeyRelatedField(read_only=True)
-
-    class Meta:
-        model = IngredientAmount
-        fields = ('id', 'Amount', 'recipe')
-
-
 class IngredientAmountSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id',)
     name = serializers.ReadOnlyField(source='ingredient.name',)
@@ -77,7 +72,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserListSerializer(read_only=True)
-    image = Base64ImageField()
+    image = Base64ImageField(max_length=None, use_url=True)
     ingredients = serializers.SerializerMethodField(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     is_favorite = serializers.SerializerMethodField(read_only=True)
@@ -106,10 +101,33 @@ class RecipeSerializer(serializers.ModelSerializer):
         return IngredientAmountSerializer(queryset, many=True).data
 
 
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(imgstr),
+                               name=f'{uuid.uuid1()}.{ext}')
+
+        return super().to_internal_value(data)
+
+
+class IngredientEditSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    amount = serializers.IntegerField()
+
+    class Meta:
+        model = Ingredient
+        fields = ('id', 'amount')
+
+
 class RecipeEditSerializer(serializers.ModelSerializer):
     author = serializers.PrimaryKeyRelatedField(read_only=True)
     image = Base64ImageField()
-    ingredients = IngredientEditSerializer(many=True)
+    # max_length=None, use_url=True
+    ingredients = IngredientEditSerializer(
+        many=True,
+    )
     cooking_time = serializers.IntegerField(min_value=1)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True,
@@ -117,7 +135,8 @@ class RecipeEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = '__all__'
+        fields = ('id', 'name', 'tags', 'ingredients',
+                  'cooking_time', 'text', 'image', 'author')
 
     def validate(self, data):
         for field in ['name', 'text']:
@@ -147,8 +166,8 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         IngredientAmount.objects.bulk_create([
             IngredientAmount(
                 recipe=recipe,
-                ingredient=Ingredient.objects.get(id=ingredient['id']),
-                amount=ingredient['amount']
+                ingredient_id=ingredient.get('id'),
+                amount=ingredient.get('amount'),
             ) for ingredient in ingredients])
 
     def create(self, validate_data):
