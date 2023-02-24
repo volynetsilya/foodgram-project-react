@@ -133,7 +133,7 @@ class IngredientEditSerializer(serializers.ModelSerializer):
 
 class RecipeEditSerializer(serializers.ModelSerializer):
     author = UserListSerializer(read_only=True)
-    image = Base64ImageField()
+    # image = Base64ImageField()
     # max_length=None, use_url=True
     ingredients = IngredientEditSerializer(
         many=True,
@@ -145,8 +145,8 @@ class RecipeEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'tags', 'ingredients',
-                  'cooking_time', 'text', 'image', 'author')
+        fields = ('name', 'tags', 'ingredients',
+                  'cooking_time', 'text', 'author')
 
     def validate(self, data):
         for field in ['name', 'text']:
@@ -181,9 +181,10 @@ class RecipeEditSerializer(serializers.ModelSerializer):
             ) for ingredient in ingredients])
 
     def create(self, validate_data):
+        author = self.context.get('request').user
         ingredients = validate_data.pop('ingredients')
         tags = validate_data.pop('tags')
-        recipe = Recipe.objects.create(**validate_data)
+        recipe = Recipe.objects.create(author=author, **validate_data)
         recipe.tags.set(tags)
         self.create_ingredients(ingredients, recipe)
         return recipe

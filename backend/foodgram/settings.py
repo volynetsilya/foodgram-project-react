@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 env_path = Path('../infra') / '.env'
 load_dotenv(dotenv_path=env_path)
 
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = (
     os.getenv('SECRET_KEY'),
@@ -108,6 +108,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+IMPORT_DATA_ADRESS = os.path.join(BASE_DIR, 'data')
+
 
 MEDIA_URL = '/media/'
 MEDIAFILES_DIRS = os.path.join(BASE_DIR, 'media')
