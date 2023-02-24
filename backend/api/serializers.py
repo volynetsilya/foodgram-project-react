@@ -1,3 +1,6 @@
+import base64
+import uuid
+
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 # from django.db import transaction
@@ -6,8 +9,6 @@ from django.core.files.base import ContentFile
 from djoser.serializers import (UserCreateSerializer, UserSerializer)
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
-import base64
-import uuid
 
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
                             Recipe, ShoppingCart, Subscription, Tag)
@@ -72,7 +73,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserListSerializer(read_only=True)
-    image = Base64ImageField(max_length=None, use_url=True)
+    image = Base64ImageField()
     ingredients = serializers.SerializerMethodField(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     is_favorite = serializers.SerializerMethodField(read_only=True)
@@ -101,6 +102,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         return IngredientAmountSerializer(queryset, many=True).data
 
 
+class ShortRecipeSerializer(serializers.ModelSerializer):
+    '''Сериализатор для просмотра рецепта на главной'''
+    image = serializers.CharField(source="image.url")
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
@@ -122,7 +132,7 @@ class IngredientEditSerializer(serializers.ModelSerializer):
 
 
 class RecipeEditSerializer(serializers.ModelSerializer):
-    author = serializers.PrimaryKeyRelatedField(read_only=True)
+    author = UserListSerializer(read_only=True)
     image = Base64ImageField()
     # max_length=None, use_url=True
     ingredients = IngredientEditSerializer(
@@ -166,15 +176,14 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         IngredientAmount.objects.bulk_create([
             IngredientAmount(
                 recipe=recipe,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'),
+                ingredient=Ingredient.objects.get(id=ingredient['id']),
+                amount=ingredient['amount']
             ) for ingredient in ingredients])
 
     def create(self, validate_data):
-        author = self.context.get('request').user
         ingredients = validate_data.pop('ingredients')
         tags = validate_data.pop('tags')
-        recipe = Recipe.objects.create(author=author, **validate_data)
+        recipe = Recipe.objects.create(**validate_data)
         recipe.tags.set(tags)
         self.create_ingredients(ingredients, recipe)
         return recipe

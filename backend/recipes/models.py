@@ -15,7 +15,7 @@ class Tag(models.Model):
     )
 
     class Meta:
-        ordering = ('name',)
+        # ordering = ('name',)
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
 
@@ -28,12 +28,12 @@ class Ingredient(models.Model):
         'Название ингредиента', max_length=200,
     )
     measurement_unit = models.CharField(
-        'Единиц измерения',
+        'Единица измерения',
         max_length=200,
     )
 
     class Meta:
-        ordering = ('name',)
+        ordering = ['name']
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         constraints = [
@@ -98,7 +98,7 @@ class IngredientAmount(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='amount',
+        related_name='quantity',
         verbose_name='Ингредиент',
     )
     amount = models.PositiveIntegerField(
@@ -107,7 +107,7 @@ class IngredientAmount(models.Model):
     )
 
     class Meta:
-        ordering = ('id',)
+        # ordering = ('id',)
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
         constraints = [
@@ -175,13 +175,13 @@ class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='shopping_carts',
+        related_name='shopping_cart',
         verbose_name='Пользователь',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shopping_carts',
+        related_name='shopping_cart',
         verbose_name='Рецепт',
     )
 
