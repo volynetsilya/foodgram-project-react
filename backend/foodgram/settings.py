@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'api',
     'users',
     'recipes',
+    # 'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -45,8 +46,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'foodgram.urls'
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TEMPLATES = [
     {
@@ -70,9 +69,7 @@ DATABASES = {
     'default': {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'ENGINE': os.getenv(
-            'DB_ENGINE', default='django.db.backends.postgresql'
-        ),
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
         'NAME': os.getenv('DB_NAME', default='postgres'),
         'USER': os.getenv('POSTGRES_USER', default='postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
@@ -96,23 +93,23 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'ru'
+LANGUAGE_CODE = 'Ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STATIC_URL = '/static/backend/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static', 'backend')
+
 IMPORT_DATA_ADRESS = os.path.join(BASE_DIR, 'data')
 
-
-MEDIA_URL = '/media/'
-MEDIAFILES_DIRS = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/backend/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media', 'backend')
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -122,10 +119,6 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
-    ],
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
     ],
 }
 

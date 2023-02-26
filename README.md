@@ -1,7 +1,6 @@
 ![foodgram_workflow](https://github.com/volynetsilya/foodgram-project-react/actions/workflows/foodgram-workflow.yml/badge.svg)
 
-
-http://158.160.14.42/admin/
+http://158.160.14.42/
 
 # Яндекс.Практикум: Продуктовый помощник Foodgram
 

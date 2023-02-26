@@ -13,7 +13,7 @@ class TagAdmin(admin.ModelAdmin):
 
 
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'measurement_unit',)
+    list_display = ('id', 'name', 'measurement_unit')
     list_filter = ('name',)
     search_fields = ('name',)
     empty_value_display = '-пусто-'
@@ -49,8 +49,8 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 
 class FavoriteRecipeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'favorite_recipe')
-    list_filter = ('user', 'favorite_recipe')
+    list_display = ('id', 'user', 'recipe')
+    list_filter = ('user', 'recipe')
     search_fields = ('favorite_recipe',)
     empty_value_display = '-пусто-'
 
