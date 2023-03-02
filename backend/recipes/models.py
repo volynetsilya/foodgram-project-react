@@ -8,7 +8,7 @@ class Tag(models.Model):
     name = models.CharField('Название тега', max_length=200)
     color = models.CharField(
         'Цветовой HEX-код',
-        max_length=7, 
+        max_length=7,
         default='#0055ff'
     )
     slug = models.SlugField(
@@ -46,7 +46,7 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     author = models.ForeignKey(
-        User, 
+        User,
         verbose_name='Автор рецепта',
         on_delete=models.CASCADE,
         related_name='recipes'
@@ -134,6 +134,7 @@ class Subscription(models.Model):
     )
 
     class Meta:
+        ordering = ['-id']
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
         constraints = [

@@ -113,7 +113,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(
                 'В корзине нет товаров', status=status.HTTP_400_BAD_REQUEST)
         ingredients = IngredientAmount.objects.filter(
-            recipe__recipe_shopping_cart__user=request.user
+            recipe__recipe_shopping_cart__user=user
         ).values(
             'ingredient__name',
             'ingredient__measurement_unit'
@@ -122,14 +122,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
             f'Список покупок для: {user.get_full_name()}\n\n'
         )
         shopping_list += '\n'.join([
-            f'- {ingredient["ingredient__name"]} '
-            f'({ingredient["ingredient__measurement_unit"]})'
+            f' - {ingredient["ingredient__name"]} '
+            f' {ingredient["ingredient__measurement_unit"]}'
             f' - {ingredient["amount"]}'
             for ingredient in ingredients
         ])
         shopping_list += '\n\nFoodgram'
-        filename = 'shopping_cart.txt'
-        response = HttpResponse(shopping_list, content_typy='text/plain')
+        filename = f'{user.username}_shopping_cart.txt'
+        response = HttpResponse(shopping_list, content_type='text/plain')
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
 
