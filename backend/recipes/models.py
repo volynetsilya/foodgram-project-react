@@ -107,12 +107,12 @@ class IngredientAmount(models.Model):
     class Meta:
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
-        constraints = [
-            models.UniqueConstraint(
-                fields=('recipe', 'ingredient'),
-                name='unique ingredient amount'
-            )
-        ]
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         fields=('recipe', 'ingredient'),
+        #         name='unique ingredient amount'
+        #     )
+        # ]
 
     def __str__(self):
         return (f'В рецепте {self.recipe.name} {self.amount} '

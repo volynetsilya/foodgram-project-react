@@ -2,7 +2,6 @@ import base64
 import uuid
 
 from django.core.files.base import ContentFile
-from django.db import transaction
 
 from djoser.serializers import UserSerializer
 from rest_framework import serializers, status
@@ -143,7 +142,6 @@ class RecipeEditSerializer(serializers.ModelSerializer):
             )
         return data
 
-    @transaction.atomic
     def create_ingredients(self, ingredients, recipe):
         IngredientAmount.objects.bulk_create([
             IngredientAmount(
@@ -152,7 +150,6 @@ class RecipeEditSerializer(serializers.ModelSerializer):
                 amount=ingredient['amount']
             ) for ingredient in ingredients])
 
-    @transaction.atomic
     def create(self, validate_data):
         ingredients = validate_data.pop('ingredients')
         tags = validate_data.pop('tags')
@@ -161,17 +158,23 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         self.create_ingredients(ingredients, recipe)
         return recipe
 
-    @transaction.atomic
-    def update(self, instance, validate_data):
-        if 'ingredients' in validate_data:
-            ingredients = validate_data.pop('ingredients')
-            self.create_ingredients(ingredients, instance)
-        if 'tags' in validate_data:
-            instance.tags.set(validate_data.pop('tags'))
-        return super().update(instance, validate_data)
+    def update(self, recipe, validate_data):
+        ingredients = validate_data.pop('ingredients')
+        tags = validate_data.pop('tags')
+        recipe = super().update(recipe, validate_data)
+        recipe.tags.clear()
+        recipe.ingredients.clear()
+        recipe.tags.set(tags)
+        self.create_ingredients(recipe=recipe,
+                                ingredients=ingredients)
+        recipe.save()
+        return recipe
 
     def to_representation(self, instance):
-        return RecipeSerializer(instance, context=self.context).data
+        request = self.context.get('request')
+        context = {'request': request}
+        return RecipeSerializer(instance,
+                                context=context).data
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
